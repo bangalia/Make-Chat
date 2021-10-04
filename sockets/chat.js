@@ -19,9 +19,13 @@ module.exports = (io, socket, onlineUsers) => {
     io.emit('new message', data);
   })
 
+  socket.on('new channel', (newChannel) => {
+    console.log(newChannel);
+  })
+
   socket.on('disconnect', () => {
     //This deletes the user by using the username we saved to the socket
     delete onlineUsers[socket.username]
     io.emit('user has left', onlineUsers);
-  });
+  })
 }

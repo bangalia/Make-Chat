@@ -1,13 +1,20 @@
 module.exports = (io, socket, onlineUsers, channels) => {
 
-  socket.on('new user', (username) => {
-    //Save the username as key to access the user's socket id
-    onlineUsers[username] = socket.id;
-    //Save the username to socket as well. This is important for later.
-    socket["username"] = username;
-    console.log(`✋ ${username} has joined the chat! ✋`);
-    io.emit("new user", username);
+  const socket = io.connect()
+
+  let currentUser
+
+  socket.emit("get online users")
+  socket.emit("get channels")
+
+  socket.emit("user changed channel", "General")
+
+  //Users can change the channel by clicking on its name.
+  $(document).on("click", ".channel", (e) => {
+    let newChannel = e.target.textContent
+    socket.emit("user changed channel", newChannel)
   })
+
 
   socket.on('get online users', () => {
     //Send over the onlineUsers

@@ -1,24 +1,11 @@
 module.exports = (io, socket, onlineUsers, channels) => {
 
-  const socket = io.connect()
+  socket.on("new user", (username) => {
+    onlineUsers[username] = socket.id
+    socket["username"] = username
 
-  let currentUser
-
-  socket.emit("get online users")
-  socket.emit("get channels")
-
-  socket.emit("user changed channel", "General")
-
-  //Users can change the channel by clicking on its name.
-  $(document).on("click", ".channel", (e) => {
-    let newChannel = e.target.textContent
-    socket.emit("user changed channel", newChannel)
-  })
-
-
-  socket.on('get online users', () => {
-    //Send over the onlineUsers
-    socket.emit('get online users', onlineUsers);
+    console.log(`${username} has joined the chat!`)
+    io.emit("new user", username)
   })
 
   socket.on('new message', (data) => {
@@ -28,8 +15,14 @@ module.exports = (io, socket, onlineUsers, channels) => {
     io.to(data.channel).emit('new message', data);
   })
 
-  socket.on('new channel', (newChannel) => {
-    console.log(newChannel);
+  socket.on('get online users', () => {
+    //Send over the onlineUsers
+    socket.emit('get online users', onlineUsers);
+  })
+
+  socket.on("get channels", () => {
+    //Send over the onlineUsers
+    socket.emit("get channels", channels)
   })
 
   socket.on('disconnect', () => {
@@ -46,6 +39,14 @@ module.exports = (io, socket, onlineUsers, channels) => {
     //Inform all clients of the new channel.
     io.emit("new channel", newChannel)
     //Emit to the client that made the new channel, to change their channel to the one they made.
+    socket.emit("user changed channel", {
+      channel: newChannel,
+      messages: channels[newChannel],
+    })
+  })
+
+  socket.on("user changed channel", (newChannel) => {
+    socket.join(newChannel)
     socket.emit("user changed channel", {
       channel: newChannel,
       messages: channels[newChannel],

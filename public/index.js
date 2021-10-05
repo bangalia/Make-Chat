@@ -76,11 +76,19 @@ $(document).ready(() => {
     }
   })
 
-  //Refresh the online user list
-  socket.on('user has left', (onlineUsers) => {
-    $('.users-online').empty();
-    for(username in onlineUsers){
-      $('.users-online').append(`<p>${username}</p>`);
+  socket.on("get channels", (onlineUsers) => {
+    //You may have not have seen this for loop before. It's syntax is for(key in obj)
+    //Our usernames are keys in the object of onlineUsers.
+    for (channel in channels) {
+      $(".channels").append(`<div class="channel">${channel}</div>`)
+    }
+  })
+
+  socket.on("user has left", (onlineUsers) => {
+    $(".users-online").empty()
+
+    for (username in onlineUsers) {
+      $(".users-online").append(`<div class="user-online">${username}</div>`)
     }
   })
 
@@ -106,6 +114,5 @@ $(document).ready(() => {
       `);
     })
   })
-  
 })
 
